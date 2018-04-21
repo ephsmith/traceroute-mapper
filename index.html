@@ -93,7 +93,7 @@
 		</ul>
 	    </div>
 	    <ul>
-		<li class="list-group-item list-group-item-info">Forked by Forrest Smith from <a href="https://stefansundin.github.io/">Stefan Sundin</a>.</li>
+		<li class="list-group-item list-group-item-info">Forked by <a href="https://github.com/ephsmith/traceroute-mapper">Forrest Smith</a> from <a href="https://github.com/stefansundin/traceroute-mapper">Stefan Sundin</a>.</li>
 		<li class="list-group-item list-group-item-info">This version uses the <a href="http://ip-api.com">ip-api.com API</a></li>
 	    </ul>
 
@@ -104,10 +104,7 @@
 	    </div>
 
 	</div>
-	
-
-	<script>
-	</script>
+		
 	<script>
 	 hosts = [];
 	 host_dict = {};
@@ -116,9 +113,10 @@
 	 cleared = true;
 	 save_map_uri = ''
 	 $("#submit").click(function() {
-	     $(this).removeClass("btn-primary").addClass("btn-danger").text("Mapping!");
-	     //$("#permalink").attr("val", "?trace="+encodeURIComponent($('#trace').val()));
-	     //$("#save-map").attr("value", location.href + "?trace=" + encodeURIComponent($('#trace').val()));
+	     $(this).removeClass("btn-primary")
+		    .addClass("btn-danger")
+		    .text("Mapping!");
+	     $("#permalink").text("Copy Map URL");
 	     save_map_uri = location.href + "?trace=" + encodeURIComponent($('#trace').val());
 	     clearMap();
 	     getHosts();
@@ -143,6 +141,7 @@
 	         host_dict = {};
 	         hosts = [];
 	         markers = [];
+		 messages = [];
 		 cleared = true;
 	     }
 	 }
@@ -246,7 +245,8 @@
 	     messages.push("Host #: " + host_num + ", IP: " + ip + " :: " + msg);
 	 }
 	 function showMessages() {
-	     $('#messages').removeClass('invisible').addClass('visible');
+	     $('#messages').removeClass('invisible')
+			   .addClass('visible');
 	     messages.forEach(function(m) {
 		 $('#message-list').append('<li class="list-group-item">' + m + '</li>');
 	     });	 
@@ -279,7 +279,9 @@
 			});
 			updateMap();
 			showMessages();
-			$("#submit").removeClass("btn-danger").addClass("btn-primary").text("Map it!");
+			$("#submit").removeClass("btn-danger")
+				    .addClass("btn-primary")
+				    .text("Map it!");
 		    }, 'json');
 
 	 };
@@ -298,59 +300,57 @@
 	 }
 
 	 /* This gist can be found at https://gist.github.com/rproenca/64781c6a1329b48a455b645d361a9aa3.js */
-	window.Clipboard = (function(window, document, navigator) {
-	var textArea,
-	copy;
+	 window.Clipboard = (function(window, document, navigator) {
+	     var textArea,
+		 copy;
 
-	function isOS() {
-	return navigator.userAgent.match(/ipad|iphone/i);
-	}
+	     function isOS() {
+		 return navigator.userAgent.match(/ipad|iphone/i);
+	     }
 
-	function createTextArea(text) {
-	textArea = document.createElement('textArea');
-	textArea.value = text;
-	document.body.appendChild(textArea);
-	}
+	     function createTextArea(text) {
+		 textArea = document.createElement('textArea');
+		 textArea.value = text;
+		 document.body.appendChild(textArea);
+	     }
 
-	function selectText() {
-	var range,
-	selection;
+	     function selectText() {
+		 var range,
+		     selection;
 
-	if (isOS()) {
-	range = document.createRange();
-	range.selectNodeContents(textArea);
-	selection = window.getSelection();
-	selection.removeAllRanges();
-	selection.addRange(range);
-	textArea.setSelectionRange(0, 999999);
-	} else {
-	textArea.select();
-	}
-	}
+		 if (isOS()) {
+		     range = document.createRange();
+		     range.selectNodeContents(textArea);
+		     selection = window.getSelection();
+		     selection.removeAllRanges();
+		     selection.addRange(range);
+		     textArea.setSelectionRange(0, 999999);
+		 } else {
+		     textArea.select();
+		 }
+	     }
 
-	function copyToClipboard() {        
-	document.execCommand('copy');
-	document.body.removeChild(textArea);
-	}
+	     function copyToClipboard() {        
+		 document.execCommand('copy');
+		 document.body.removeChild(textArea);
+	     }
 
-	copy = function(text) {
-	createTextArea(text);
-	selectText();
-	copyToClipboard();
-	};
+	     copy = function(text) {
+		 createTextArea(text);
+		 selectText();
+		 copyToClipboard();
+	     };
 
-	return {
-	copy: copy
-	};
-	})(window, document, navigator);
+	     return {
+		 copy: copy
+	     };
+	 })(window, document, navigator);
 
 
 
 	</script>
-	<!-- <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js">
-	     </script> -->
 	<script async defer
-		src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDpT-oPf8GhWonZoSjTOQi_kRd_6Gc1T7Q&callback=initMap">
+	    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDpT-oPf8GhWonZoSjTOQi_kRd_6Gc1T7Q&callback=initMap">
 	</script>
     </body>
 </html>
