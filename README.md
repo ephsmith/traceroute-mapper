@@ -1,35 +1,7 @@
 # traceroute-mapper
+This fork of
+[traceroute-mapper](https://stefansundin.github.io/traceroute-mapper)
+uses the [ip-api.com api](http://ip-api.com) to perform a batch query
+on IP locations and includes a "copy map url" control in place of the
+permalink control. 
 
-Run it from your terminal:
-
-### Linux
-
-Put this in your `.bash_profile`:
-
-```bash
-function traceroute-mapper {
-  xdg-open "https://stefansundin.github.io/traceroute-mapper/?trace=$(traceroute -q1 $* | sed ':a;N;$!ba;s/\n/%0A/g')"
-}
-```
-
-Then simply run: `traceroute-mapper google.com`
-
-
-### Mac
-
-Put this in your `.bash_profile`:
-
-```bash
-function traceroute-mapper {
-  open "https://stefansundin.github.io/traceroute-mapper/?trace=$(traceroute -q1 $*)"
-}
-```
-
-Then simply run: `traceroute-mapper google.com`
-
-
-### Windows
-
-Put [traceroute-mapper.bat](https://stefansundin.github.io/traceroute-mapper/traceroute-mapper.bat) in your `%PATH%` (e.g. `C:\Windows\`).
-
-Then open cmd and run: `traceroute-mapper google.com`

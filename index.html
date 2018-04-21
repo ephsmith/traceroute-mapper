@@ -1,291 +1,357 @@
 <!DOCTYPE html>
+
+
 <html>
-<head>
-  <title>Traceroute mapper</title>
+    <head>
+	<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+	<meta charset="utf-8">
+	<link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" integrity="sha384-pdapHxIh7EYuwy6K7iE41uXVxGCXY0sAjBzaElYGJUrzwodck3Lx6IE2lA0rFREo" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css" integrity="sha384-aUGj/X2zp5rLCbBxumKTCw2Z50WgIr1vs/PFN4praOTvYXWlVyh2UtNUU0KAUhAX" crossorigin="anonymous">
+	<script src="https://code.jquery.com/jquery-2.1.4.min.js" integrity="sha384-R4/ztc4ZlRqWjqIuvf6RX5yb/v90qNGx6fS48N0tRxiGkqveZETq72KgDVJCp2TC" crossorigin="anonymous"></script>
 
-  <meta charset="utf-8">
-  <meta name="author" content="Stefan Sundin">
-  <meta name="description" content="Visualize traceroute on a map.">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="referrer" content="origin">
+	<title>Traceroute Mapper</title>
+	<style>
+	 body {
+	     padding: 0 15px;
+	     margin-bottom: 100px;
+	 }
+	 a {
+	     cursor: pointer;
+	 }
+	 .container {
+	     padding: 0;
+	 }
+	 @media (min-width: 768px) {
+	     .container {
+		 max-width: 770px;
+	     }
+	 }
 
-  <link rel="icon" href="img/icon32.png">
-  <link rel="license" href="https://www.gnu.org/licenses/gpl-3.0.html" title="GNU GPL v3 or later">
-  <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" integrity="sha384-pdapHxIh7EYuwy6K7iE41uXVxGCXY0sAjBzaElYGJUrzwodck3Lx6IE2lA0rFREo" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css" integrity="sha384-aUGj/X2zp5rLCbBxumKTCw2Z50WgIr1vs/PFN4praOTvYXWlVyh2UtNUU0KAUhAX" crossorigin="anonymous">
-  <script src="https://code.jquery.com/jquery-2.1.4.min.js" integrity="sha384-R4/ztc4ZlRqWjqIuvf6RX5yb/v90qNGx6fS48N0tRxiGkqveZETq72KgDVJCp2TC" crossorigin="anonymous"></script>
-  <script src="https://maps.google.com/maps/api/js"></script>
-<style>
-body {
-  padding: 0 15px;
-  margin-bottom: 100px;
-}
-a {
-  cursor: pointer;
-}
-.container {
-  padding: 0;
-}
-@media (min-width: 768px) {
-  .container {
-    max-width: 770px;
-  }
-}
+	 header {
+	     margin-top: 25px;
+	     text-align: center;
+	 }
+	 header a {
+	     color: black;
+	 }
+	 header a:hover {
+	     color: black;
+	     cursor: default;
+	     text-decoration: none;
+	 }
+	 header a:focus {
+	     color: black;
+	     text-decoration: none;
+	 }
+	 h2 {
+	     border-bottom: 1px solid #ccc;
+	 }
+	 textarea {
+	     font-family: monospace;
+	     min-height: 200px;
+	     resize: vertical;
+	 }
+	 #map {
+	     height: 500px;
+	 }
+	 .map-btn {
+	     background-color: white;
+	     border: 2px solid white;
+	     border-radius: 3px;
+	     box-shadow: 0 2px 6px rgba(0,0,0,.3);
+	     cursor: pointer;
+	     margin: 8px;
+	     text-align: center;
+	     color: rgb(25,25,25);
+	     font-family: Roboto, Arial, sans-serif;
+	     font-size: 13px;
+	     line-height: 20px;
+	     padding: 4px 6px;
+	 }
+	 a.map-btn:hover {
+	     text-decoration: none;
+	 }
+	</style>
+    </head>
+    <body>
+	<header>
+	    <h1 itemprop="name">Traceroute Mapper</h1>
+	</header>
+	<div class="container">
+	    <hr>
+	    <p>Run <tt>traceroute</tt> on your local machine, then paste the output here to map the route.</p>
+	    <p><textarea class="form-control" id="trace" placeholder="traceroute to ..."></textarea></p>
+	    <p><button class="form-control btn btn-primary" id="submit">Map it!</button></p>	    
+	    <div id="map"></div>
+	    <h2>Tips</h2>
+	    <p>Linux: <tt>traceroute -q1 google.com | xclip -sel clip</tt></p>
+	    <p>Mac: <tt>traceroute -q1 google.com | pbcopy</tt></p>
+	    <p>Windows: <tt>tracert google.com | clip</tt></p>
+	    <div class="invisible" id="messages">
+		<p>Exception Messages</p>
+		<ul class="list-group" id="message-list">
+		</ul>
+	    </div>
+	    <ul>
+		<li class="list-group-item list-group-item-info">Forked by Forrest Smith from <a href="https://stefansundin.github.io/">Stefan Sundin</a>.</li>
+		<li class="list-group-item list-group-item-info">This version uses the <a href="http://ip-api.com">ip-api.com API</a></li>
+	    </ul>
 
-header {
-  margin-top: 25px;
-  text-align: center;
-}
-header a {
-  color: black;
-}
-header a:hover {
-  color: black;
-  cursor: default;
-  text-decoration: none;
-}
-header a:focus {
-  color: black;
-  text-decoration: none;
-}
-h2 {
-  border-bottom: 1px solid #ccc;
-}
-textarea {
-  font-family: monospace;
-  min-height: 200px;
-  resize: vertical;
-}
-#map {
-  height: 500px;
-}
-.map-btn {
-  background-color: white;
-  border: 2px solid white;
-  border-radius: 3px;
-  box-shadow: 0 2px 6px rgba(0,0,0,.3);
-  cursor: pointer;
-  margin: 8px;
-  text-align: center;
-  color: rgb(25,25,25);
-  font-family: Roboto, Arial, sans-serif;
-  font-size: 13px;
-  line-height: 20px;
-  padding: 4px 6px;
-}
-a.map-btn:hover {
-  text-decoration: none;
-}
-</style>
-</head>
-<body>
-  <header>
-    <h1 itemprop="name"><a href="/traceroute-mapper/">Traceroute mapper</a></h1>
-  </header>
+	    <div class="hidden">
+		<div class="map-btn" id="clear-map">Clear map</div>
+		<div class="map-btn" id="permalink">Copy Map URL <span class="glyphicon glyphicon-share"></span></div>
+		<input type="text" value="" id="save-map">
+	    </div>
 
-  <div class="container">
-    <hr>
-    <p>Run <tt>traceroute</tt> on your local machine, then paste the output here to map the route. <a id="example">Show example.</a></p>
-    <p><textarea class="form-control" id="trace" placeholder="traceroute to ..."></textarea></p>
-    <p><button class="form-control btn btn-primary" id="submit">Map it!</button></p>
-    <div id="map"></div>
-    <h2>Tips</h2>
-    <p>Linux: <tt>traceroute -q1 google.com | xclip -sel clip</tt></p>
-    <p>Mac: <tt>traceroute -q1 google.com | pbcopy</tt></p>
-    <p>Windows: <tt>tracert google.com | clip</tt></p>
-    <p><a href="https://github.com/stefansundin/traceroute-mapper#traceroute-mapper">Open from your terminal!</a></p>
-    <hr>
-    <ul>
-      <li>Made by <a href="https://stefansundin.github.io/">Stefan Sundin</a>.</li>
-      <li>View <a href="https://github.com/stefansundin/traceroute-mapper">source code</a>.</li>
-      <li>Uses <a href="https://ipinfo.io/">ipinfo.io</a> and Google Maps API.</li>
-    </ul>
-  </div>
+	</div>
+	
 
-  <div class="hidden">
-    <div class="map-btn" id="clear-map">Clear map</div>
-    <a class="map-btn" id="permalink">Permalink <span class="glyphicon glyphicon-share"></span></a>
-  </div>
+	<script>
+	</script>
+	<script>
+	 hosts = [];
+	 host_dict = {};
+	 markers = [];
+	 messages = [];
+	 cleared = true;
+	 save_map_uri = ''
+	 $("#submit").click(function() {
+	     $(this).removeClass("btn-primary").addClass("btn-danger").text("Mapping!");
+	     //$("#permalink").attr("val", "?trace="+encodeURIComponent($('#trace').val()));
+	     //$("#save-map").attr("value", location.href + "?trace=" + encodeURIComponent($('#trace').val()));
+	     save_map_uri = location.href + "?trace=" + encodeURIComponent($('#trace').val());
+	     clearMap();
+	     getHosts();
+	     getLocs();
+	 }); 
+	 
+	 $("#clear-map").click(clearMap);
+	 $("#permalink").click(function() {
+	     if ($("#save-map").value == "") {
+		 alert("Please map a trace first.");
+	     } else {
+		 Clipboard.copy(save_map_uri);
+		 $(this).text("Copied");
+	     }
+	 });
+	 
+	 function clearMap()  {
+	     if (!cleared) {
+		 markers.forEach(function(marker) {
+		     marker.setMap(null);
+		 });
+	         host_dict = {};
+	         hosts = [];
+	         markers = [];
+		 cleared = true;
+	     }
+	 }
+	 
+	 function initMap() {
 
-<script>
-var map = new google.maps.Map($("#map")[0], {
-  center: { lat: 35, lng: 0 },
-  zoom: 2,
-  mapTypeControl: false,
-  streetViewControl: false
-});
-var markers = [];
+	     map = new google.maps.Map(document.getElementById('map'), {
+		 zoom: 3,
+		 center: {lat: 35.1495, lng: -90.0490},
+		 mapTypeControl: false,
+		 streetViewControl: false
+	     });
+	     map.controls[google.maps.ControlPosition.TOP_LEFT].push($("#clear-map")[0]);
+	     map.controls[google.maps.ControlPosition.TOP_RIGHT].push($("#permalink")[0]);
+	     if (hosts.length > 0) {updateMap();}
 
-map.controls[google.maps.ControlPosition.TOP_LEFT].push($("#clear-map")[0]);
-map.controls[google.maps.ControlPosition.TOP_RIGHT].push($("#permalink")[0]);
+	 };
 
-// store location lookups in a database to prevent duplicate lookups
-var db = {};
+	 function updateMap()  {
+	     // Add some markers to the map.
+	     // Note: The code uses the JavaScript Array.prototype.map() method to
+	     // create an array of markers based on a given "locations" array.
+	     // The map() method here has nothing to do with the Google Maps API.
+	     markers = hosts.map(function(h) {
+		 return new google.maps.Marker({
+		     position: host_dict[h.ip].loc,
+		     label: String(host_dict[h.ip].n),
+		     title: h.ip,
+		     map: map
+		 });
+	     });
 
-$("#submit").click(function() {
-  $(this).removeClass("btn-danger").addClass("btn-primary").text("Map it!");
-  var text = $("#trace").val();
-  $("#permalink").attr("href", "?trace="+encodeURIComponent(text));
-  var hosts = [];
-  var ips = [];
-  text.split("\n").forEach(function(line) {
-    var r1, r2;
-    if (
-      (r1=/^ *(\d+) /.exec(line)) !== null && (
-        (r2=/\(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\)/.exec(line)) !== null ||
-        (r2=/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/.exec(line)) !== null ||
-        (r2=/\((?:[0-9a-f]{1,4}::?){1,7}[0-9a-f]{1,4}\)/.exec(line)) !== null ||
-        (r2=/\b(?:[0-9a-f]{1,4}::?){1,7}[0-9a-f]{1,4}\b/.exec(line)) !== null
-      )
-    ) {
-      var n = parseInt(r1[1]);
-      var ip = r2[0];
-      if (ip[0] == "(") {
-        ip = ip.substring(1, r2[0].length-1);
-      }
-      if (ips.indexOf(ip) === -1) {
-        ips.push(ip);
-        hosts.push({ n: n, ip: ip });
-      }
-    }
-  });
-  var bounds = new google.maps.LatLngBounds();
-  var fitToMapTimer = null;
-  hosts.forEach(function(host,i) {
-    var ip = host["ip"];
+	     var bounds = new google.maps.LatLngBounds();
+	     for (var i = 0; i < markers.length; i++) {
+		 bounds.extend(markers[i].getPosition());
+	     }
+	     map.setCenter(bounds.getCenter());
+	     map.fitBounds(bounds);
 
-    var resolve = function() {
-      // draw marker
-      var marker = new google.maps.Marker({
-        map: map,
-        position: host["loc"],
-        label: host["n"] > 9 ? "+" : host["n"].toString(),
-        title: host["n"]+": "+ip,
-        zIndex: host["n"]
-      });
-      markers.push(marker);
+	     hosts.forEach(function(h, i){
+		 // draw lines
+ 		 if (i>0) {
+		     last_h = hosts[i-1];
+ 		     var line = new google.maps.Polyline({
+ 			 map: map,
+ 			 path: [ host_dict[last_h.ip].loc, host_dict[h.ip].loc],
+ 			 geodesic: true,
+ 			 strokeColor: "#FF0000",
+ 			 strokeOpacity: 1.0,
+ 			 strokeWeight: 2
+ 		     });
+ 		     markers.push(line);
+ 		 };
+	     });
+	     cleared = false;
+	 };
 
-      // draw lines
-      if (hosts[i-1] && hosts[i-1]["loc"]) {
-        // console.log("drawing line between", [ hosts[i-1]["loc"], host["loc"] ]);
-        var line = new google.maps.Polyline({
-          map: map,
-          path: [ hosts[i-1]["loc"], host["loc"] ],
-          geodesic: true,
-          strokeColor: "#FF0000",
-          strokeOpacity: 1.0,
-          strokeWeight: 2
-        });
-        markers.push(line);
-      }
-      if (hosts[i+1] && hosts[i+1]["loc"]) {
-        // console.log("drawing line between", [ host["loc"], hosts[i+1]["loc"] ]);
-        var line = new google.maps.Polyline({
-          map: map,
-          path: [ host["loc"], hosts[i+1]["loc"] ],
-          geodesic: true,
-          strokeColor: "#FF0000",
-          strokeOpacity: 1.0,
-          strokeWeight: 2
-        });
-        markers.push(line);
-      }
+	 
+	 function getHosts()  {
+	     var text = $("#trace").val();
+	     var ips = [];
+	     text.split("\n").forEach(function(line) {
+		 var r1, r2;
+		 if (
+		     (r1=/^ *(\d+) /.exec(line)) !== null && (
+			 (r2=/\(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\)/.exec(line)) !== null ||
+			 (r2=/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/.exec(line)) !== null ||
+			 (r2=/\((?:[0-9a-f]{1,4}::?){1,7}[0-9a-f]{1,4}\)/.exec(line)) !== null ||
+			 (r2=/\b(?:[0-9a-f]{1,4}::?){1,7}[0-9a-f]{1,4}\b/.exec(line)) !== null
+		     )
+		 ) {
+		     var n = parseInt(r1[1]);
+		     var ip = r2[0];
+		     if (ip[0] == "(") {
+			 ip = ip.substring(1, r2[0].length-1);
+		     }
+		     if (ips.indexOf(ip) === -1) {
+			 hosts.push({ n: n, ip: ip });
+			 host_dict[ip] = {n:n};
+		     }
+		 }
+	     });
+	 };
+	 function cleanLocs(arr) {
+	     var cleaned = [];
+	     cleaned.push(arr[0]);
+	     arr.forEach(function(itm) {
+		 var unique = true;
+		 cleaned.forEach(function(itm2) {
+		     if(itm.lat == itm2.lat && itm.lon == itm2.lon)
+			 unique = false;
+		 });
+		 if(unique) {
+		     cleaned.push(itm);
+		 }
+	     });
+	     return cleaned;
+	 };
 
-      bounds.extend(marker.position);
-      if (fitToMapTimer) {
-        clearTimeout(fitToMapTimer);
-      }
-      fitToMapTimer = setTimeout(function() {
-        map.fitBounds(bounds);
-      }, 100);
-    }
+	 function pushMessage(host_num, ip, msg) {
+	     messages.push("Host #: " + host_num + ", IP: " + ip + " :: " + msg);
+	 }
+	 function showMessages() {
+	     $('#messages').removeClass('invisible').addClass('visible');
+	     messages.forEach(function(m) {
+		 $('#message-list').append('<li class="list-group-item">' + m + '</li>');
+	     });	 
+	 };
 
-    if (db[ip]) {
-      if (db[ip] != "undefined") {
-        host["loc"] = db[ip];
-        resolve();
-      }
-    }
-    else {
-      $.get("https://ipinfo.io/"+ip+"/loc", function(loc) {
-        loc = loc.trim();
-        if (loc == "undefined") {
-          db[ip] = loc;
-          return;
-        }
-        var ll = loc.split(",").map(parseFloat);
-        console.log(i, ip, ll);
-        db[ip] = host["loc"] = { lat: ll[0], lng: ll[1] };
-        resolve();
-      }).fail(function(xhr) {
-        console.log(xhr);
-        err = (xhr.status == 429) ? "ipinfo.io ratelimit exhausted. Please try again tomorrow, or run the script from your own server." : (xhr.status == 0) ? "Request not sent to ipinfo.io. Are you using an adblocker?" : "An error occurred.";
-        $("#submit").removeClass("btn-primary").addClass("btn-danger").text(err);
-      });
-    }
-  });
-  if (hosts.length == 0) {
-    $("#submit").removeClass("btn-primary").addClass("btn-danger").text("Could not find any IP addresses in the input.");
-  }
-});
+	 function getLocs()  {
+	     var query = [];
+	     hosts.forEach(function(h) {
+		 query.push({query: h.ip});
+	     });
+	     hosts = []
+	     messages = []
+	     ipapi = 'http://ip-api.com/batch?fields=lat,lon,query';
+	     $.post(ipapi, JSON.stringify(query),
+		    function(err, resp, body) {
+			var result = cleanLocs(body.responseJSON);
+			result.forEach(
+			    function(r) {
+				if (r.lat && r.lon) {
+				    var loc = {lat: Number(r.lat), lng: Number(r.lon)};
+				    host_dict[r.query].loc = loc;
+				    hosts.push({ip:r.query,n:host_dict[r.query].n});
+				}
+				else {
+				    pushMessage(host_dict[r.query].n, r.query, "No location information");
+				}
+			    });
+			hosts.sort(function(a,b) {
+			    return a.n - b.n;
+			});
+			updateMap();
+			showMessages();
+			$("#submit").removeClass("btn-danger").addClass("btn-primary").text("Map it!");
+		    }, 'json');
 
-$("#clear-map").click(function() {
-  markers.forEach(function(marker) {
-    marker.setMap(null);
-  });
-  markers = [];
-});
-$("#permalink").click(function() {
-  if (this.href == "") {
-    alert("Please map a trace first.");
-  }
-});
+	 };
 
-var qs = window.location.search;
-if (qs[0] == "?") {
-  var params = {};
-  qs.substr(1).split("&").forEach(function(param) {
-    param = param.split("=");
-    params[param[0]] = decodeURIComponent(param[1]);
-  });
-  if (params["trace"]) {
-    $("#trace").val(params["trace"].trim());
-    $("#submit").click();
-    setTimeout(function() {
-      if (markers.length > 0) {
-        $("#map")[0].scrollIntoView();
-      }
-    }, 200);
-  }
-}
+	 var qs = window.location.search;
+	 if (qs[0] == "?") {
+	     var params = {};
+	     qs.substr(1).split("&").forEach(function(param) {
+		 param = param.split("=");
+		 params[param[0]] = decodeURIComponent(param[1]);
+	     });
+	     if (params["trace"]) {
+		 $("#trace").val(params["trace"].trim());
+		 $("#submit").click();
+	     }
+	 }
 
-$("#example").click(function() {
-  $("#trace").val("traceroute to china.cn (202.130.245.42), 30 hops max, 60 byte packets\n\
- 1  lc207-gw.campus.ltu.se (130.240.207.1)  0.219 ms\n\
- 2  gw22.pub.ltu.se (130.240.22.129)  0.974 ms\n\
- 3  sunetgreen.net.ltu.se (130.240.22.78)  1.336 ms\n\
- 4  ltu-br1.sunet.se (193.11.0.48)  1.302 ms\n\
- 5  ltu-br2-xe-0-0-3.sunet.se (130.242.85.94)  1.202 ms\n\
- 6  z3lla-xe-2-0-0.sunet.se (130.242.85.89)  0.542 ms\n\
- 7  se-lla.nordu.net (109.105.102.93)  0.574 ms\n\
- 8  se-fre.nordu.net (109.105.97.113)  13.105 ms\n\
- 9  s-b3-link.telia.net (213.248.97.17)  16.265 ms\n\
-10  s-bb4-link.telia.net (80.91.253.226)  13.546 ms\n\
-11  kbn-bb3-link.telia.net (62.115.139.167)  22.249 ms\n\
-12  nyk-bb1-link.telia.net (62.115.141.99)  115.487 ms\n\
-13  ash-bb4-link.telia.net (213.155.133.9)  126.166 ms\n\
-14  las-b3-link.telia.net (213.155.137.59)  194.745 ms\n\
-15  219.158.102.81 (219.158.102.81)  369.420 ms\n\
-16  219.158.102.81 (219.158.102.81)  385.404 ms\n\
-17  219.158.98.145 (219.158.98.145)  387.710 ms\n\
-18  124.65.194.82 (124.65.194.82)  368.584 ms\n\
-19  61.148.143.18 (61.148.143.18)  368.667 ms\n\
-20  61.148.143.18 (61.148.143.18)  378.916 ms\n\
-21  210.74.176.238 (210.74.176.238)  424.108 ms\n\
-22  210.74.176.238 (210.74.176.238)  429.721 ms");
-  $("#submit").click();
-});
+	 /* This gist can be found at https://gist.github.com/rproenca/64781c6a1329b48a455b645d361a9aa3.js */
+	window.Clipboard = (function(window, document, navigator) {
+	var textArea,
+	copy;
 
-</script>
-</body>
+	function isOS() {
+	return navigator.userAgent.match(/ipad|iphone/i);
+	}
+
+	function createTextArea(text) {
+	textArea = document.createElement('textArea');
+	textArea.value = text;
+	document.body.appendChild(textArea);
+	}
+
+	function selectText() {
+	var range,
+	selection;
+
+	if (isOS()) {
+	range = document.createRange();
+	range.selectNodeContents(textArea);
+	selection = window.getSelection();
+	selection.removeAllRanges();
+	selection.addRange(range);
+	textArea.setSelectionRange(0, 999999);
+	} else {
+	textArea.select();
+	}
+	}
+
+	function copyToClipboard() {        
+	document.execCommand('copy');
+	document.body.removeChild(textArea);
+	}
+
+	copy = function(text) {
+	createTextArea(text);
+	selectText();
+	copyToClipboard();
+	};
+
+	return {
+	copy: copy
+	};
+	})(window, document, navigator);
+
+
+
+	</script>
+	<!-- <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js">
+	     </script> -->
+	<script async defer
+		src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDpT-oPf8GhWonZoSjTOQi_kRd_6Gc1T7Q&callback=initMap">
+	</script>
+    </body>
 </html>
+
