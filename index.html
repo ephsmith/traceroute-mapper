@@ -118,6 +118,12 @@
 		    .text("Mapping!");
 	     $("#permalink").text("Copy Map URL");
 	     save_map_uri = location.href + "?trace=" + encodeURIComponent($('#trace').val());
+	     $.get('http://ephsmith.org/trmapper/shorten.php?url=' + save_map_uri,
+	           function(shortened) {
+		       save_map_uri = shortened;
+		       console.log(save_map_uri);
+		   });
+	     
 	     clearMap();
 	     getHosts();
 	     getLocs();
