@@ -99,7 +99,7 @@
 
 	    <div class="hidden">
 		<div class="map-btn" id="clear-map">Clear map</div>
-		<div class="map-btn" id="permalink">Copy Map URL <span class="glyphicon glyphicon-share"></span></div>
+		<div class="map-btn" id="permalink">Copy Map URL</div>
 		<input type="text" value="" id="save-map">
 	    </div>
 
@@ -117,13 +117,10 @@
 		    .addClass("btn-danger")
 		    .text("Mapping!");
 	     $("#permalink").text("Copy Map URL");
-	     save_map_uri = location.href + "?trace=" + encodeURIComponent($('#trace').val());
-	     $.get('http://ephsmith.org/trmapper/shorten.php?url=' + save_map_uri,
-	           function(shortened) {
-		       save_map_uri = shortened;
-		       console.log(save_map_uri);
-		   });
-	     
+	 save_map_uri = location.href + "?trace=" + encodeURIComponent($('#trace').val());
+	 $.post('http://ephsmith.org/trmapper/shorten.php', JSON.stringify({url: save_map_uri}))
+	  .done(function(shortened) {
+	      save_map_uri = shortened; });
 	     clearMap();
 	     getHosts();
 	     getLocs();
