@@ -10,3 +10,7 @@ In addition, the following features have been added:
 - A message section is printed below the map for exceptions like
   missing location information
 
+## Share your Trace!
+The "Copy Map URL" button now grabs a sharable shortened URL that
+links back to your trace!
+
