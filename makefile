@@ -1,6 +1,5 @@
 # Deployment directory
-DEST=/home/ubuntu/tm-test
-
+DEST=/var/www/classapps/static/trmapper
 
 deploy: index.html shorten.php
 	cp index.html $(DEST)
